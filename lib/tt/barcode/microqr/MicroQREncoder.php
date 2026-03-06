@@ -1,7 +1,7 @@
 <?php
-namespace tokushima\barcode\microqr;
+namespace tt\barcode\microqr;
 
-use tokushima\barcode\qrcode\ReedSolomon;
+use tt\barcode\qrcode\ReedSolomon;
 
 /**
  * マイクロQRコードエンコーダ

@@ -6,7 +6,7 @@ spl_autoload_register(function($class){
 	}
 });
 
-use tokushima\barcode\MicroQR;
+use tt\barcode\MicroQR;
 
 $output_dir = __DIR__.'/output';
 if(!is_dir($output_dir)){

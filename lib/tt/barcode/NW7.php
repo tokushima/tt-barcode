@@ -1,9 +1,9 @@
 <?php
-namespace tokushima\barcode;
+namespace tt\barcode;
 
-use tokushima\barcode\nw7\NW7Encoder;
-use tokushima\barcode\nw7\SVGRenderer;
-use tokushima\barcode\nw7\PNGRenderer;
+use tt\barcode\nw7\NW7Encoder;
+use tt\barcode\nw7\SVGRenderer;
+use tt\barcode\nw7\PNGRenderer;
 
 /**
  * NW-7 (Codabar) バーコード生成

@@ -1,5 +1,5 @@
 <?php
-namespace tokushima\barcode\microqr;
+namespace tt\barcode\microqr;
 
 /**
  * マイクロQRコードをPNGとしてレンダリングする (GDライブラリ使用)

@@ -1,10 +1,10 @@
 <?php
-namespace tokushima\barcode;
+namespace tt\barcode;
 
-use tokushima\barcode\microqr\MicroQRData;
-use tokushima\barcode\microqr\MicroQREncoder;
-use tokushima\barcode\microqr\SVGRenderer;
-use tokushima\barcode\microqr\PNGRenderer;
+use tt\barcode\microqr\MicroQRData;
+use tt\barcode\microqr\MicroQREncoder;
+use tt\barcode\microqr\SVGRenderer;
+use tt\barcode\microqr\PNGRenderer;
 
 /**
  * マイクロQRコード生成

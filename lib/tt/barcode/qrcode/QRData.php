@@ -1,5 +1,5 @@
 <?php
-namespace tokushima\barcode\qrcode;
+namespace tt\barcode\qrcode;
 
 /**
  * QRコード仕様データテーブル (ISO/IEC 18004)

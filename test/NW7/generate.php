@@ -6,7 +6,7 @@ spl_autoload_register(function($class){
 	}
 });
 
-use tokushima\barcode\NW7;
+use tt\barcode\NW7;
 
 $output_dir = __DIR__.'/output';
 if(!is_dir($output_dir)){

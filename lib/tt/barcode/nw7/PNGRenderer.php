@@ -1,5 +1,5 @@
 <?php
-namespace tokushima\barcode\nw7;
+namespace tt\barcode\nw7;
 
 /**
  * NW-7バーコードをPNGとしてレンダリングする (GDライブラリ使用)

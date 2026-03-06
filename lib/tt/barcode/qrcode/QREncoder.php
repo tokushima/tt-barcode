@@ -1,5 +1,5 @@
 <?php
-namespace tokushima\barcode\qrcode;
+namespace tt\barcode\qrcode;
 
 /**
  * QRコードエンコーダ

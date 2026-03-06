@@ -1,5 +1,5 @@
 <?php
-namespace tokushima\barcode\microqr;
+namespace tt\barcode\microqr;
 
 /**
  * マイクロQRコード仕様データテーブル (ISO/IEC 18004 Annex)

@@ -1,5 +1,5 @@
 <?php
-namespace tokushima\barcode\qrcode;
+namespace tt\barcode\qrcode;
 
 /**
  * GF(256) 上の Reed-Solomon 誤り訂正

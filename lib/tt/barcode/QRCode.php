@@ -1,10 +1,10 @@
 <?php
-namespace tokushima\barcode;
+namespace tt\barcode;
 
-use tokushima\barcode\qrcode\QRData;
-use tokushima\barcode\qrcode\QREncoder;
-use tokushima\barcode\qrcode\SVGRenderer;
-use tokushima\barcode\qrcode\PNGRenderer;
+use tt\barcode\qrcode\QRData;
+use tt\barcode\qrcode\QREncoder;
+use tt\barcode\qrcode\SVGRenderer;
+use tt\barcode\qrcode\PNGRenderer;
 
 /**
  * QRコード生成

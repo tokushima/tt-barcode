@@ -2,7 +2,7 @@
 	"name": "tokushima/tt-barcode",
 	"autoload": {
 		"psr-4": {
-			"tokushima\\barcode\\": "lib/tokushima/barcode/"
+			"tt\\barcode\\": "lib/tt/barcode/"
 		}
 	}
 }

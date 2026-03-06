@@ -1,5 +1,5 @@
 <?php
-namespace tokushima\barcode\barcode;
+namespace tt\barcode;
 
 /**
  * 郵便カスタマーバーコード

@@ -11,10 +11,10 @@ namespace tt\barcode\qrcode;
  *  - youtube: YouTube風デザイン (円形モジュール + カスタムファインダパターン)
  */
 class SVGRenderer{
-	const DESIGN_STANDARD = 'standard';
-	const DESIGN_ROUNDED = 'rounded';
-	const DESIGN_DOTS = 'dots';
-	const DESIGN_YOUTUBE = 'youtube';
+	const string DESIGN_STANDARD = 'standard';
+	const string DESIGN_ROUNDED = 'rounded';
+	const string DESIGN_DOTS = 'dots';
+	const string DESIGN_YOUTUBE = 'youtube';
 
 	private array $modules;
 	private int $size;

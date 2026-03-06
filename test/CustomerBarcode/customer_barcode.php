@@ -73,22 +73,22 @@ eq('S91000673-80-25!91-2!9E',$bar->getChardata());
 $bar = \tt\barcode\CustomerBarcode::create('0640804','札幌市中央区南四条西29丁目1524－23 第2郵便ハウス501');
 eq('S064080429-1524-23-2-3E',$bar->getChardata());
 
-// SVG出力テスト
-$svg = $bar->toSvg();
-eq(str_contains($svg, '<svg'));
-eq(str_contains($svg, 'viewBox'));
-
-// SVGファイル出力テスト
-$path = $bar->writeSvg(tempnam(sys_get_temp_dir(), 'svg'));
-eq(is_file($path));
-eq(str_contains(file_get_contents($path), '<svg'));
-
-// PNG出力テスト
-$path = $bar->writePng(tempnam(sys_get_temp_dir(), 'png'));
-eq(is_file($path));
-$info = getimagesize($path);
-eq($info[0] > 0);
-eq($info[1] > 0);
-
 // バー数テスト (スタート1 + データ20*3 + CD1*3 + ストップ1 = 65)
 eq(65, count($bar->getBars()));
+
+// SVG 一致テスト
+$bar1 = \tt\barcode\CustomerBarcode::create('263-0023','千葉市稲毛区緑町3丁目30－8 郵便ビル403号');
+eq(file_get_contents(\testman\Resource::path('CustomerBarcode/basic.svg')), $bar1->render_svg());
+
+// PNG 一致テスト
+eq(file_get_contents(\testman\Resource::path('CustomerBarcode/basic.png')), $bar1->render_png());
+
+// オプション付きSVG 一致テスト
+$bar2 = \tt\barcode\CustomerBarcode::create('0640804','札幌市中央区南四条西29丁目1524－23 第2郵便ハウス501');
+eq(file_get_contents(\testman\Resource::path('CustomerBarcode/custom.svg')), $bar2->render_svg(['color' => '#003366', 'bgcolor' => '#FFFFFF']));
+
+// ファイル保存テスト
+$tmp = tempnam(sys_get_temp_dir(), 'cb_svg');
+$bar1->save_svg($tmp);
+eq(file_get_contents(\testman\Resource::path('CustomerBarcode/basic.svg')), file_get_contents($tmp));
+unlink($tmp);

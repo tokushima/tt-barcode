@@ -66,7 +66,12 @@ class MicroQREncoder{
 
 		for($v = 1; $v <= 4; $v++){
 			$ec = $this->ec_level;
-			if($v === 1) $ec = MicroQRData::EC_DETECT;
+			if($v === 1){
+				if($ec !== MicroQRData::EC_L && $ec !== MicroQRData::EC_DETECT){
+					continue;
+				}
+				$ec = MicroQRData::EC_DETECT;
+			}
 
 			if(!isset(MicroQRData::CAPACITY[$v][$ec])){
 				continue;
@@ -93,34 +98,42 @@ class MicroQREncoder{
 	}
 
 	private function encode_data(string $text, int $mode): string{
+		return match($mode){
+			MicroQRData::MODE_NUMERIC => $this->encode_numeric($text),
+			MicroQRData::MODE_ALPHANUMERIC => $this->encode_alphanumeric($text),
+			MicroQRData::MODE_BYTE => $this->encode_byte($text),
+			default => '',
+		};
+	}
+
+	private function encode_numeric(string $text): string{
 		$bits = '';
-		switch($mode){
-			case MicroQRData::MODE_NUMERIC:
-				$chunks = str_split($text, 3);
-				foreach($chunks as $chunk){
-					$val = (int)$chunk;
-					$bit_len = (strlen($chunk) === 3) ? 10 : ((strlen($chunk) === 2) ? 7 : 4);
-					$bits .= str_pad(decbin($val), $bit_len, '0', STR_PAD_LEFT);
-				}
-				break;
-			case MicroQRData::MODE_ALPHANUMERIC:
-				$chars = MicroQRData::ALPHANUMERIC_CHARS;
-				for($i = 0; $i < strlen($text); $i += 2){
-					$c1 = strpos($chars, $text[$i]);
-					if($i + 1 < strlen($text)){
-						$c2 = strpos($chars, $text[$i + 1]);
-						$bits .= str_pad(decbin($c1 * 45 + $c2), 11, '0', STR_PAD_LEFT);
-					}else{
-						$bits .= str_pad(decbin($c1), 6, '0', STR_PAD_LEFT);
-					}
-				}
-				break;
-			case MicroQRData::MODE_BYTE:
-				$bytes = unpack('C*', $text);
-				foreach($bytes as $byte){
-					$bits .= str_pad(decbin($byte), 8, '0', STR_PAD_LEFT);
-				}
-				break;
+		foreach(str_split($text, 3) as $chunk){
+			$bit_len = match(strlen($chunk)){ 3 => 10, 2 => 7, default => 4 };
+			$bits .= str_pad(decbin((int)$chunk), $bit_len, '0', STR_PAD_LEFT);
+		}
+		return $bits;
+	}
+
+	private function encode_alphanumeric(string $text): string{
+		$bits = '';
+		$chars = MicroQRData::ALPHANUMERIC_CHARS;
+		for($i = 0; $i < strlen($text); $i += 2){
+			$c1 = strpos($chars, $text[$i]);
+			if($i + 1 < strlen($text)){
+				$c2 = strpos($chars, $text[$i + 1]);
+				$bits .= str_pad(decbin($c1 * 45 + $c2), 11, '0', STR_PAD_LEFT);
+			}else{
+				$bits .= str_pad(decbin($c1), 6, '0', STR_PAD_LEFT);
+			}
+		}
+		return $bits;
+	}
+
+	private function encode_byte(string $text): string{
+		$bits = '';
+		foreach(unpack('C*', $text) as $byte){
+			$bits .= str_pad(decbin($byte), 8, '0', STR_PAD_LEFT);
 		}
 		return $bits;
 	}
@@ -150,17 +163,21 @@ class MicroQREncoder{
 		$remaining = $capacity - strlen($bits);
 		$bits .= str_repeat('0', min($terminator_len, $remaining));
 
-		// バイト境界パディング
-		if(strlen($bits) % 8 !== 0){
-			$bits .= str_repeat('0', 8 - (strlen($bits) % 8));
-		}
-
-		// パディングコードワード
-		$pad = ['11101100', '00010001'];
-		$i = 0;
-		while(strlen($bits) < $capacity){
-			$bits .= $pad[$i % 2];
-			$i++;
+		if($this->version === 1 || $this->version === 3){
+			// M1/M3: 最終データコードワードは4ビット, パディングは全てゼロ (ISO/IEC 18004)
+			$bits .= str_repeat('0', $capacity - strlen($bits));
+		}else{
+			// バイト境界パディング
+			if(strlen($bits) % 8 !== 0){
+				$bits .= str_repeat('0', 8 - (strlen($bits) % 8));
+			}
+			// パディングコードワード
+			$pad = ['11101100', '00010001'];
+			$i = 0;
+			while(strlen($bits) < $capacity){
+				$bits .= $pad[$i % 2];
+				$i++;
+			}
 		}
 		return substr($bits, 0, $capacity);
 	}
@@ -260,9 +277,19 @@ class MicroQREncoder{
 	}
 
 	private function place_data(array $codewords): void{
+		$ec = ($this->version === 1) ? MicroQRData::EC_DETECT : $this->ec_level;
+		$ec_idx = ($this->version === 1) ? 0 : $ec - 1;
+		$vt = MicroQRData::VERSION_TABLE[$this->version][$ec_idx];
+		$data_count = $vt[2];
+
 		$bits = '';
-		foreach($codewords as $cw){
-			$bits .= str_pad(decbin($cw), 8, '0', STR_PAD_LEFT);
+		foreach($codewords as $i => $cw){
+			// M1/M3: 最後のデータコードワードは4ビットのみ (ISO/IEC 18004)
+			if(($this->version === 1 || $this->version === 3) && $i === $data_count - 1){
+				$bits .= str_pad(decbin($cw >> 4), 4, '0', STR_PAD_LEFT);
+			}else{
+				$bits .= str_pad(decbin($cw), 8, '0', STR_PAD_LEFT);
+			}
 		}
 
 		$bit_index = 0;
@@ -287,19 +314,21 @@ class MicroQREncoder{
 	}
 
 	private function apply_best_mask(): int{
-		$max_masks = ($this->version === 1) ? 4 : 4;
 		$best_mask = 0;
 		$best_score = -1;
+		$unmasked = $this->modules;
 
-		for($mask = 0; $mask < $max_masks; $mask++){
+		for($mask = 0; $mask < 4; $mask++){
+			$this->modules = $unmasked;
 			$trial = $this->apply_mask($mask);
 			$score = $this->evaluate_mask($trial);
 			if($score > $best_score){
 				$best_score = $score;
 				$best_mask = $mask;
-				$this->modules = $trial;
 			}
 		}
+		$this->modules = $unmasked;
+		$this->modules = $this->apply_mask($best_mask);
 		return $best_mask;
 	}
 
@@ -318,35 +347,25 @@ class MicroQREncoder{
 	}
 
 	/**
-	 * マイクロQRのマスク評価
-	 * SUM1とSUM2の組み合わせで最適マスクを選択
+	 * マイクロQRのマスク評価 (ISO/IEC 18004 7.8.3.2)
+	 * 最下行と最右列の暗モジュール数で評価
 	 */
 	private function evaluate_mask(array $modules): int{
 		$n = $this->size;
 
-		// SUM1: 最下行の左端からの同色連続数
+		// SUM1: 最右列(列n-1)の暗モジュール数 (行1〜n-1)
 		$sum1 = 0;
-		$last = $modules[$n - 1][1];
-		for($c = 1; $c < $n; $c++){
-			if($modules[$n - 1][$c] === $last){
-				$sum1++;
-			}else{
-				break;
-			}
-		}
-
-		// SUM2: 最右列の上端からの同色連続数
-		$sum2 = 0;
-		$last = $modules[1][$n - 1];
 		for($r = 1; $r < $n; $r++){
-			if($modules[$r][$n - 1] === $last){
-				$sum2++;
-			}else{
-				break;
-			}
+			if($modules[$r][$n - 1]) $sum1++;
 		}
 
-		return $sum1 * 16 + $sum2;
+		// SUM2: 最下行(行n-1)の暗モジュール数 (列1〜n-1)
+		$sum2 = 0;
+		for($c = 1; $c < $n; $c++){
+			if($modules[$n - 1][$c]) $sum2++;
+		}
+
+		return ($sum1 <= $sum2) ? ($sum1 * 16 + $sum2) : ($sum2 * 16 + $sum1);
 	}
 
 	private function place_format_info(int $mask): void{
@@ -355,15 +374,17 @@ class MicroQREncoder{
 		$symbol_number = MicroQRData::SYMBOL_NUMBERS[$key];
 		$format_bits = MicroQRData::FORMAT_INFO[$symbol_number][$mask];
 
-		// 水平: 行8, 列1-8 (MSBから)
-		for($i = 0; $i < 8; $i++){
-			$bit = (($format_bits >> (14 - $i)) & 1) === 1;
-			$this->modules[8][$i + 1] = $bit;
-		}
-		// 垂直: 列8, 行7-1 (残り7bit)
+		// 垂直: 列8, 行1-7 (bit 0-6), 行8列8 (bit 7)
 		for($i = 0; $i < 7; $i++){
-			$bit = (($format_bits >> (6 - $i)) & 1) === 1;
-			$this->modules[7 - $i][8] = $bit;
+			$bit = (($format_bits >> $i) & 1) === 1;
+			$this->modules[$i + 1][8] = $bit;
+		}
+		$this->modules[8][8] = (($format_bits >> 7) & 1) === 1;
+
+		// 水平: 行8, 列7-1 (bit 8-14)
+		for($i = 0; $i < 7; $i++){
+			$bit = (($format_bits >> (8 + $i)) & 1) === 1;
+			$this->modules[8][7 - $i] = $bit;
 		}
 	}
 }

@@ -15,6 +15,7 @@
 <rect x="180" y="20" width="10" height="10" fill="#000000"/>
 <rect x="20" y="30" width="10" height="10" fill="#000000"/>
 <rect x="80" y="30" width="10" height="10" fill="#000000"/>
+<rect x="100" y="30" width="10" height="10" fill="#000000"/>
 <rect x="120" y="30" width="10" height="10" fill="#000000"/>
 <rect x="140" y="30" width="10" height="10" fill="#000000"/>
 <rect x="150" y="30" width="10" height="10" fill="#000000"/>
@@ -26,7 +27,6 @@
 <rect x="50" y="40" width="10" height="10" fill="#000000"/>
 <rect x="60" y="40" width="10" height="10" fill="#000000"/>
 <rect x="80" y="40" width="10" height="10" fill="#000000"/>
-<rect x="100" y="40" width="10" height="10" fill="#000000"/>
 <rect x="110" y="40" width="10" height="10" fill="#000000"/>
 <rect x="120" y="40" width="10" height="10" fill="#000000"/>
 <rect x="170" y="40" width="10" height="10" fill="#000000"/>
@@ -47,6 +47,7 @@
 <rect x="140" y="60" width="10" height="10" fill="#000000"/>
 <rect x="20" y="70" width="10" height="10" fill="#000000"/>
 <rect x="80" y="70" width="10" height="10" fill="#000000"/>
+<rect x="100" y="70" width="10" height="10" fill="#000000"/>
 <rect x="110" y="70" width="10" height="10" fill="#000000"/>
 <rect x="120" y="70" width="10" height="10" fill="#000000"/>
 <rect x="130" y="70" width="10" height="10" fill="#000000"/>
@@ -60,6 +61,7 @@
 <rect x="60" y="80" width="10" height="10" fill="#000000"/>
 <rect x="70" y="80" width="10" height="10" fill="#000000"/>
 <rect x="80" y="80" width="10" height="10" fill="#000000"/>
+<rect x="100" y="80" width="10" height="10" fill="#000000"/>
 <rect x="110" y="80" width="10" height="10" fill="#000000"/>
 <rect x="120" y="80" width="10" height="10" fill="#000000"/>
 <rect x="180" y="80" width="10" height="10" fill="#000000"/>
@@ -72,7 +74,6 @@
 <rect x="70" y="100" width="10" height="10" fill="#000000"/>
 <rect x="80" y="100" width="10" height="10" fill="#000000"/>
 <rect x="90" y="100" width="10" height="10" fill="#000000"/>
-<rect x="100" y="100" width="10" height="10" fill="#000000"/>
 <rect x="110" y="100" width="10" height="10" fill="#000000"/>
 <rect x="120" y="100" width="10" height="10" fill="#000000"/>
 <rect x="160" y="100" width="10" height="10" fill="#000000"/>

@@ -13,7 +13,7 @@ class NW7Encoder{
 	 * 1=ナロー, 0=ワイド (逆転注意: パターン表記では1がワイド)
 	 * ここでは true=ワイド, false=ナロー
 	 */
-	private const PATTERNS = [
+	private const array PATTERNS = [
 		'0' => [1,1,1,1,1,2,2],
 		'1' => [1,1,1,1,2,2,1],
 		'2' => [1,1,1,2,1,1,2],

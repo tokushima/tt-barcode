@@ -1,62 +1,29 @@
 <?php
-spl_autoload_register(function($class){
-	$file = __DIR__.'/../../lib/'.str_replace('\\', '/', $class).'.php';
-	if(is_file($file)){
-		require_once $file;
-	}
-});
-
 use tt\barcode\QRCode;
 
-$output_dir = __DIR__.'/output';
-if(!is_dir($output_dir)){
-	mkdir($output_dir, 0777, true);
-}
-
 $text = 'https://example.com/test?id=12345';
+// SVG文字列の一致テスト
+eq(file_get_contents(\testman\Resource::path('QRCode/standard.svg')), QRCode::create($text)->render_svg());
+eq(file_get_contents(\testman\Resource::path('QRCode/rounded.svg')), QRCode::create($text)->design('rounded')->fg_color('#1a1a2e')->render_svg());
+eq(file_get_contents(\testman\Resource::path('QRCode/dots.svg')), QRCode::create($text)->design('dots')->fg_color('#e94560')->bg_color('#0f3460')->render_svg());
+eq(file_get_contents(\testman\Resource::path('QRCode/youtube.svg')), QRCode::create($text, QRCode::EC_H)->design('youtube')->fg_color('#FF0000')->finder_color('#CC0000')->margin(2)->render_svg());
+eq(file_get_contents(\testman\Resource::path('QRCode/gradient.svg')), QRCode::create($text)->design('dots')->gradient('#FF6B6B', '#4ECDC4')->render_svg());
+eq(file_get_contents(\testman\Resource::path('QRCode/japanese.svg')), QRCode::create('こんにちは世界')->design('rounded')->render_svg());
 
-echo "=== QRCode Test ===\n\n";
+// PNG バイナリの一致テスト
+eq(file_get_contents(\testman\Resource::path('QRCode/standard.png')), QRCode::create($text)->render_png());
+eq(file_get_contents(\testman\Resource::path('QRCode/youtube.png')), QRCode::create($text, QRCode::EC_H)->design('youtube')->fg_color('#FF0000')->render_png());
 
-echo "1. Standard SVG ... ";
-QRCode::create($text)->save_svg($output_dir.'/standard.svg');
-echo "OK\n";
+// ショートカット
+eq(file_get_contents(\testman\Resource::path('QRCode/standard.svg')), QRCode::svg($text));
 
-echo "2. Rounded SVG ... ";
-QRCode::create($text)->design('rounded')->fg_color('#1a1a2e')->save_svg($output_dir.'/rounded.svg');
-echo "OK\n";
+// ファイル保存
+$tmp = tempnam(sys_get_temp_dir(), 'qr_svg');
+QRCode::create($text)->save_svg($tmp);
+eq(file_get_contents(\testman\Resource::path('QRCode/standard.svg')), file_get_contents($tmp));
+unlink($tmp);
 
-echo "3. Dots SVG ... ";
-QRCode::create($text)->design('dots')->fg_color('#e94560')->bg_color('#0f3460')->save_svg($output_dir.'/dots.svg');
-echo "OK\n";
-
-echo "4. YouTube SVG ... ";
-QRCode::create($text, QRCode::EC_H)
-	->design('youtube')->fg_color('#FF0000')->finder_color('#CC0000')->margin(2)
-	->save_svg($output_dir.'/youtube.svg');
-echo "OK\n";
-
-echo "5. Gradient SVG ... ";
-QRCode::create($text)->design('dots')->gradient('#FF6B6B', '#4ECDC4')->save_svg($output_dir.'/gradient.svg');
-echo "OK\n";
-
-echo "6. Standard PNG ... ";
-QRCode::png($text, $output_dir.'/standard.png');
-echo "OK\n";
-
-echo "7. YouTube PNG ... ";
-QRCode::create($text, QRCode::EC_H)->design('youtube')->fg_color('#FF0000')->save_png($output_dir.'/youtube.png');
-echo "OK\n";
-
-echo "8. Japanese ... ";
-QRCode::create('こんにちは世界')->design('rounded')->save_svg($output_dir.'/japanese.svg');
-echo "OK\n";
-
-echo "9. Shortcut SVG ... ";
-$svg = QRCode::svg('Hello');
-echo "OK (".strlen($svg)." bytes)\n";
-
-echo "\n=== All Passed ===\n";
-
-foreach(glob($output_dir.'/*') as $f){
-	printf("  %-20s %s\n", basename($f), number_format(filesize($f)).' bytes');
-}
+$tmp = tempnam(sys_get_temp_dir(), 'qr_png');
+QRCode::png($text, $tmp);
+eq(file_get_contents(\testman\Resource::path('QRCode/standard.png')), file_get_contents($tmp));
+unlink($tmp);

@@ -64,34 +64,42 @@ class QREncoder{
 	}
 
 	private function encode_data(string $text, int $mode): string{
+		return match($mode){
+			QRData::MODE_NUMERIC => $this->encode_numeric($text),
+			QRData::MODE_ALPHANUMERIC => $this->encode_alphanumeric($text),
+			QRData::MODE_BYTE => $this->encode_byte($text),
+			default => '',
+		};
+	}
+
+	private function encode_numeric(string $text): string{
 		$bits = '';
-		switch($mode){
-			case QRData::MODE_NUMERIC:
-				$chunks = str_split($text, 3);
-				foreach($chunks as $chunk){
-					$val = (int)$chunk;
-					$bit_len = (strlen($chunk) === 3) ? 10 : ((strlen($chunk) === 2) ? 7 : 4);
-					$bits .= str_pad(decbin($val), $bit_len, '0', STR_PAD_LEFT);
-				}
-				break;
-			case QRData::MODE_ALPHANUMERIC:
-				$chars = QRData::ALPHANUMERIC_CHARS;
-				for($i = 0; $i < strlen($text); $i += 2){
-					$c1 = strpos($chars, $text[$i]);
-					if($i + 1 < strlen($text)){
-						$c2 = strpos($chars, $text[$i + 1]);
-						$bits .= str_pad(decbin($c1 * 45 + $c2), 11, '0', STR_PAD_LEFT);
-					}else{
-						$bits .= str_pad(decbin($c1), 6, '0', STR_PAD_LEFT);
-					}
-				}
-				break;
-			case QRData::MODE_BYTE:
-				$bytes = unpack('C*', $text);
-				foreach($bytes as $byte){
-					$bits .= str_pad(decbin($byte), 8, '0', STR_PAD_LEFT);
-				}
-				break;
+		foreach(str_split($text, 3) as $chunk){
+			$bit_len = match(strlen($chunk)){ 3 => 10, 2 => 7, default => 4 };
+			$bits .= str_pad(decbin((int)$chunk), $bit_len, '0', STR_PAD_LEFT);
+		}
+		return $bits;
+	}
+
+	private function encode_alphanumeric(string $text): string{
+		$bits = '';
+		$chars = QRData::ALPHANUMERIC_CHARS;
+		for($i = 0; $i < strlen($text); $i += 2){
+			$c1 = strpos($chars, $text[$i]);
+			if($i + 1 < strlen($text)){
+				$c2 = strpos($chars, $text[$i + 1]);
+				$bits .= str_pad(decbin($c1 * 45 + $c2), 11, '0', STR_PAD_LEFT);
+			}else{
+				$bits .= str_pad(decbin($c1), 6, '0', STR_PAD_LEFT);
+			}
+		}
+		return $bits;
+	}
+
+	private function encode_byte(string $text): string{
+		$bits = '';
+		foreach(unpack('C*', $text) as $byte){
+			$bits .= str_pad(decbin($byte), 8, '0', STR_PAD_LEFT);
 		}
 		return $bits;
 	}
@@ -303,16 +311,19 @@ class QREncoder{
 	private function apply_best_mask(): int{
 		$best_mask = 0;
 		$best_score = PHP_INT_MAX;
+		$unmasked = $this->modules;
 
 		for($mask = 0; $mask < 8; $mask++){
+			$this->modules = $unmasked;
 			$trial = $this->apply_mask($mask);
 			$score = $this->evaluate_penalty($trial);
 			if($score < $best_score){
 				$best_score = $score;
 				$best_mask = $mask;
-				$this->modules = $trial;
 			}
 		}
+		$this->modules = $unmasked;
+		$this->modules = $this->apply_mask($best_mask);
 		return $best_mask;
 	}
 
@@ -416,21 +427,29 @@ class QREncoder{
 	private function place_format_info(int $mask): void{
 		$format_bits = QRData::FORMAT_INFO[$this->ec_level * 8 + $mask];
 
-		$pos_h = [
-			[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],
-			[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8],
-		];
-		for($i = 0; $i < 15; $i++){
-			[$r, $c] = $pos_h[$i];
-			$this->modules[$r][$c] = (($format_bits >> (14 - $i)) & 1) === 1;
+		$n = $this->size;
+
+		// Copy 1: column 8 (top portion rows 0-8)
+		for($i = 0; $i < 6; $i++){
+			$this->modules[$i][8] = (($format_bits >> $i) & 1) === 1;
+		}
+		$this->modules[7][8] = (($format_bits >> 6) & 1) === 1;
+		$this->modules[8][8] = (($format_bits >> 7) & 1) === 1;
+
+		// Copy 1: column 8 (bottom portion rows n-7 to n-1)
+		for($i = 0; $i < 7; $i++){
+			$this->modules[$n - 7 + $i][8] = (($format_bits >> (8 + $i)) & 1) === 1;
 		}
 
-		$pos_v = [];
-		for($i = 0; $i < 7; $i++) $pos_v[] = [$this->size - 1 - $i, 8];
-		for($i = 0; $i < 8; $i++) $pos_v[] = [8, $this->size - 8 + $i];
-		for($i = 0; $i < 15; $i++){
-			[$r, $c] = $pos_v[$i];
-			$this->modules[$r][$c] = (($format_bits >> (14 - $i)) & 1) === 1;
+		// Copy 2: row 8 (right portion cols n-1 to n-8)
+		for($i = 0; $i < 8; $i++){
+			$this->modules[8][$n - 1 - $i] = (($format_bits >> $i) & 1) === 1;
+		}
+
+		// Copy 2: row 8 (left portion cols 7,5,4,3,2,1,0)
+		$this->modules[8][7] = (($format_bits >> 8) & 1) === 1;
+		for($i = 0; $i < 6; $i++){
+			$this->modules[8][5 - $i] = (($format_bits >> (9 + $i)) & 1) === 1;
 		}
 	}
 

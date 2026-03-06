@@ -41,10 +41,10 @@ use tt\barcode\qrcode\PNGRenderer;
  *   アイコンを使う場合はEC_Hを推奨
  */
 class QRCode{
-	const EC_L = QRData::EC_L;
-	const EC_M = QRData::EC_M;
-	const EC_Q = QRData::EC_Q;
-	const EC_H = QRData::EC_H;
+	const int EC_L = QRData::EC_L;
+	const int EC_M = QRData::EC_M;
+	const int EC_Q = QRData::EC_Q;
+	const int EC_H = QRData::EC_H;
 
 	private array $modules;
 	private string $design = 'standard';
@@ -92,6 +92,14 @@ class QRCode{
 	public function finder_color(string $color): self{ $this->finder_color = $color; return $this; }
 	public function module_size(int $px): self{ $this->module_size = $px; return $this; }
 	public function margin(int $modules): self{ $this->margin = $modules; return $this; }
+
+	/**
+	 * 出力サイズをピクセルで指定（module_sizeを自動計算）
+	 */
+	public function size(int $px): self{
+		$this->module_size = max(1, (int)floor($px / (count($this->modules) + $this->margin * 2)));
+		return $this;
+	}
 	public function dot_scale(float $scale): self{ $this->dot_scale = $scale; return $this; }
 	public function corner_radius(float $ratio): self{ $this->corner_radius = $ratio; return $this; }
 

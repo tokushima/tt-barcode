@@ -27,10 +27,10 @@ use tt\barcode\microqr\PNGRenderer;
  *   MicroQR::EC_DETECT (M1のみ), MicroQR::EC_L, MicroQR::EC_M, MicroQR::EC_Q (M4のみ)
  */
 class MicroQR{
-	const EC_DETECT = MicroQRData::EC_DETECT;
-	const EC_L = MicroQRData::EC_L;
-	const EC_M = MicroQRData::EC_M;
-	const EC_Q = MicroQRData::EC_Q;
+	const int EC_DETECT = MicroQRData::EC_DETECT;
+	const int EC_L = MicroQRData::EC_L;
+	const int EC_M = MicroQRData::EC_M;
+	const int EC_Q = MicroQRData::EC_Q;
 
 	private array $modules;
 	private string $fg_color = '#000000';
@@ -67,6 +67,14 @@ class MicroQR{
 	public function bg_color(string $color): self{ $this->bg_color = $color; return $this; }
 	public function module_size(int $px): self{ $this->module_size = $px; return $this; }
 	public function margin(int $modules): self{ $this->margin = $modules; return $this; }
+
+	/**
+	 * 出力サイズをピクセルで指定（module_sizeを自動計算）
+	 */
+	public function size(int $px): self{
+		$this->module_size = max(1, (int)floor($px / (count($this->modules) + $this->margin * 2)));
+		return $this;
+	}
 
 	/**
 	 * SVG文字列を返す

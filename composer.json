@@ -1,8 +1,16 @@
 {
 	"name": "tokushima/tt-barcode",
+	"require": {
+		"php": ">=8.3"
+	},
 	"autoload": {
 		"psr-4": {
 			"tt\\barcode\\": "lib/tt/barcode/"
 		}
+	},
+	"archive": {
+		"exclude": [
+			"/test"
+		]
 	}
 }

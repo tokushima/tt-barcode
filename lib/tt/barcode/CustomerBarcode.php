@@ -7,10 +7,10 @@ namespace tt\barcode;
  */
 class CustomerBarcode{
 	// バーの種類
-	const BAR_LONG = 1;      // ロングバー（フルハイト）
-	const BAR_SEMI_UP = 2;   // セミロングバー（上）アセンダ
-	const BAR_SEMI_DOWN = 3; // セミロングバー（下）ディセンダ
-	const BAR_TIMING = 4;    // タイミングバー（短）トラッカー
+	const int BAR_LONG = 1;      // ロングバー（フルハイト）
+	const int BAR_SEMI_UP = 2;   // セミロングバー（上）アセンダ
+	const int BAR_SEMI_DOWN = 3; // セミロングバー（下）ディセンダ
+	const int BAR_TIMING = 4;    // タイミングバー（短）トラッカー
 
 	// キャラクタ → バーパターン（各3バー）
 	private static array $CHAR_PATTERNS = [
@@ -160,7 +160,7 @@ class CustomerBarcode{
 	 *   string color バーの色 デフォルト #000000
 	 *   string bgcolor 背景色 デフォルト transparent
 	 */
-	public function toSvg(array $opt = []): string{
+	public function render_svg(array $opt = []): string{
 		$bar_height = $opt['bar_height'] ?? 3.6;
 		$module_width = $opt['module_width'] ?? 0.6;
 		$gap = $opt['gap'] ?? 0.6;
@@ -206,13 +206,17 @@ class CustomerBarcode{
 	/**
 	 * SVGファイルを保存
 	 */
-	public function writeSvg(string $filename, array $opt = []): string{
-		file_put_contents($filename, $this->toSvg($opt));
-		return $filename;
+	public function save_svg(string $filename, array $opt = []): self{
+		$dir = dirname($filename);
+		if(!is_dir($dir)){
+			mkdir($dir, 0777, true);
+		}
+		file_put_contents($filename, $this->render_svg($opt));
+		return $this;
 	}
 
 	/**
-	 * PNG画像を生成
+	 * PNGバイナリを返す
 	 * @param array $opt オプション
 	 *   float bar_height バーの高さ(mm) デフォルト3.6
 	 *   float module_width モジュール幅(mm) デフォルト0.6
@@ -221,7 +225,7 @@ class CustomerBarcode{
 	 *   string bgcolor 背景色 デフォルト 透明
 	 *   int dpi 解像度 デフォルト300
 	 */
-	public function writePng(string $filename, array $opt = []): string{
+	public function render_png(array $opt = []): string{
 		$bar_height = $opt['bar_height'] ?? 3.6;
 		$module_width = $opt['module_width'] ?? 0.6;
 		$gap = $opt['gap'] ?? 0.6;
@@ -263,9 +267,22 @@ class CustomerBarcode{
 			$x += $module_width_px + $gap_px;
 		}
 
-		imagepng($canvas, $filename);
+		ob_start();
+		imagepng($canvas);
 		imagedestroy($canvas);
-		return $filename;
+		return ob_get_clean();
+	}
+
+	/**
+	 * PNGファイルに保存
+	 */
+	public function save_png(string $filename, array $opt = []): self{
+		$dir = dirname($filename);
+		if(!is_dir($dir)){
+			mkdir($dir, 0777, true);
+		}
+		file_put_contents($filename, $this->render_png($opt));
+		return $this;
 	}
 
 	/**

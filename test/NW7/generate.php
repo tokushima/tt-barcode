@@ -1,46 +1,23 @@
 <?php
-spl_autoload_register(function($class){
-	$file = __DIR__.'/../../lib/'.str_replace('\\', '/', $class).'.php';
-	if(is_file($file)){
-		require_once $file;
-	}
-});
-
 use tt\barcode\NW7;
 
-$output_dir = __DIR__.'/output';
-if(!is_dir($output_dir)){
-	mkdir($output_dir, 0777, true);
-}
-
-// シンプルなSVG
-$svg = NW7::svg('12345');
-file_put_contents($output_dir.'/simple.svg', $svg);
-echo "Generated: simple.svg\n";
-
-// PNG保存
-NW7::png('12345', $output_dir.'/simple.png');
-echo "Generated: simple.png\n";
+// シンプル
+eq(file_get_contents(\testman\Resource::path('NW7/simple.svg')), NW7::svg('12345'));
+eq(file_get_contents(\testman\Resource::path('NW7/simple.png')), NW7::create('12345')->render_png());
 
 // カスタマイズ
-NW7::create('A9876543210B')
-	->fg_color('#003366')
-	->height(100)
-	->margin(20)
-	->wide_ratio(3.0)
-	->save_svg($output_dir.'/custom.svg');
-echo "Generated: custom.svg\n";
+eq(file_get_contents(\testman\Resource::path('NW7/custom.svg')), NW7::create('9876543210', 'A', 'B')->fg_color('#003366')->height(100)->margin(20)->wide_ratio(3.0)->render_svg());
 
 // テキスト非表示
-NW7::create('12345')
-	->show_text(false)
-	->save_svg($output_dir.'/no_text.svg');
-echo "Generated: no_text.svg\n";
+eq(file_get_contents(\testman\Resource::path('NW7/no_text.svg')), NW7::create('12345')->show_text(false)->render_svg());
 
 // スタート/ストップ指定
-NW7::create('9999', 'C', 'D')
-	->save_svg($output_dir.'/start_stop.svg')
-	->save_png($output_dir.'/start_stop.png');
-echo "Generated: start_stop.svg, start_stop.png\n";
+$ss = NW7::create('9999', 'C', 'D');
+eq(file_get_contents(\testman\Resource::path('NW7/start_stop.svg')), $ss->render_svg());
+eq(file_get_contents(\testman\Resource::path('NW7/start_stop.png')), $ss->render_png());
 
-echo "Done.\n";
+// ファイル保存
+$tmp = tempnam(sys_get_temp_dir(), 'nw7');
+NW7::png('12345', $tmp);
+eq(file_get_contents(\testman\Resource::path('NW7/simple.png')), file_get_contents($tmp));
+unlink($tmp);

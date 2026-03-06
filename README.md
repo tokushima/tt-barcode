@@ -1,6 +1,6 @@
 # tt-barcode
 
-PHP 8.3+ のバーコード生成ライブラリ。QRコード、マイクロQRコード、Data Matrix、NW-7 (Codabar)、郵便カスタマーバーコードに対応。SVG / PNG 出力をサポート。
+PHP 8.3+ のバーコード生成ライブラリ。QRコード、マイクロQRコード、rMQR、Data Matrix、NW-7 (Codabar)、郵便カスタマーバーコードに対応。SVG / PNG 出力をサポート。
 
 ## インストール
 
@@ -112,6 +112,38 @@ DataMatrix::create('Hello')
 ```
 
 ECC 200 準拠。正方形 (10x10 - 144x144) および長方形 (8x18 - 16x48) シンボルに対応。ASCIIエンコーディング (数字2桁圧縮含む)。
+
+## rMQR (Rectangular Micro QR Code)
+
+```php
+use tt\barcode\rMQR;
+
+// SVG文字列を取得
+$svg = rMQR::svg('Hello');
+
+// PNGファイルに保存
+rMQR::png('Hello', '/path/to/output.png');
+
+// ビルダーパターンでカスタマイズ
+$rmqr = rMQR::create('Hello')
+    ->fg_color('#003366')
+    ->module_size(15)
+    ->margin(3);
+
+$svg = $rmqr->render_svg();              // SVG文字列を取得
+$rmqr->save_svg('/path/to/output.svg');   // ファイルに保存
+
+$binary = $rmqr->render_png();            // PNGバイナリを取得
+$rmqr->save_png('/path/to/output.png');   // ファイルに保存
+
+// 誤り訂正レベル指定
+rMQR::create('Hello', rMQR::EC_H)->save_svg('/path/to/output.svg');
+
+// バージョン指定
+rMQR::create('Hello', rMQR::EC_M, 'R9x43')->save_svg('/path/to/output.svg');
+```
+
+ISO/IEC 23941 準拠。32バージョン (R7x43 - R17x139) に対応。誤り訂正: `EC_M` (デフォルト), `EC_H`。数字・英数字・バイトモードを自動選択。
 
 ## NW-7 (Codabar)
 

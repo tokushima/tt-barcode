@@ -4,22 +4,15 @@ namespace tt\barcode\qrcode;
 /**
  * QRコードマトリクスをSVGとしてレンダリングする
  *
- * デザイン:
- *  - standard: 標準的な正方形モジュール
- *  - rounded: 角丸モジュール
- *  - dots: 円形モジュール
- *  - youtube: YouTube風デザイン (円形モジュール + カスタムファインダパターン)
+ * module_shape: 'square' (デフォルト), 'dots'
+ * finder_shape: 'square' (デフォルト), 'round', 'modern'
  */
 class SVGRenderer{
-	const string DESIGN_STANDARD = 'standard';
-	const string DESIGN_ROUNDED = 'rounded';
-	const string DESIGN_DOTS = 'dots';
-	const string DESIGN_YOUTUBE = 'youtube';
-
 	private array $modules;
 	private int $size;
 
-	private string $design = self::DESIGN_STANDARD;
+	private string $module_shape = 'square';
+	private string $finder_shape = 'square';
 	private string $fg_color = '#000000';
 	private string $bg_color = '#FFFFFF';
 	private ?string $finder_color = null;
@@ -28,7 +21,8 @@ class SVGRenderer{
 	private int $module_size = 10;
 	private int $margin = 4;
 	private float $dot_scale = 0.85;
-	private float $corner_radius = 0.4;
+	private int $alpha = 100;
+
 	private ?string $icon_svg = null;
 	private ?string $icon_path = null;
 	private float $icon_scale = 0.2;
@@ -38,7 +32,8 @@ class SVGRenderer{
 		$this->size = count($modules);
 	}
 
-	public function design(string $design): self{ $this->design = $design; return $this; }
+	public function module_shape(string $shape): self{ $this->module_shape = $shape; return $this; }
+	public function finder_shape(string $shape): self{ $this->finder_shape = $shape; return $this; }
 	public function fg_color(string $color): self{ $this->fg_color = $color; return $this; }
 	public function bg_color(string $color): self{ $this->bg_color = $color; return $this; }
 	public function finder_color(string $color): self{ $this->finder_color = $color; return $this; }
@@ -52,7 +47,7 @@ class SVGRenderer{
 	public function module_size(int $px): self{ $this->module_size = $px; return $this; }
 	public function margin(int $modules): self{ $this->margin = $modules; return $this; }
 	public function dot_scale(float $scale): self{ $this->dot_scale = max(0.1, min(1.0, $scale)); return $this; }
-	public function corner_radius(float $ratio): self{ $this->corner_radius = max(0.0, min(0.5, $ratio)); return $this; }
+	public function alpha(int $percent): self{ $this->alpha = max(0, min(100, $percent)); return $this; }
 
 	public function icon_svg(string $svg, float $scale = 0.2): self{
 		$this->icon_svg = $svg;
@@ -91,32 +86,33 @@ class SVGRenderer{
 		}
 
 		$finder_fill = $this->finder_color ? sprintf('fill="%s"', self::escape($this->finder_color)) : $fill_attr;
+		$custom_finder = ($this->finder_shape !== 'square');
 
-		$svg .= '<g>'."\n";
+		$svg .= ($this->alpha < 100)
+			? sprintf('<g opacity="%.2f">'."\n", $this->alpha / 100)
+			: '<g>'."\n";
 
-		if($this->design === self::DESIGN_YOUTUBE){
-			$svg .= $this->render_youtube_finders($finder_fill, $ms);
+		if($custom_finder){
+			$svg .= match($this->finder_shape){
+				'round' => $this->render_round_finders($finder_fill, $ms),
+				'modern' => $this->render_modern_finders($finder_fill, $ms),
+				default => '',
+			};
+		}
 
-			for($r = 0; $r < $this->size; $r++){
-				for($c = 0; $c < $this->size; $c++){
-					if($this->is_finder_module($r, $c) || !$this->modules[$r][$c]) continue;
-					$svg .= $this->render_dot_module($r, $c, $ms, $fill_attr);
-				}
-			}
-		}else{
-			for($r = 0; $r < $this->size; $r++){
-				for($c = 0; $c < $this->size; $c++){
-					if(!$this->modules[$r][$c]) continue;
-					$f = $this->is_finder_module($r, $c) ? $finder_fill : $fill_attr;
+		for($r = 0; $r < $this->size; $r++){
+			for($c = 0; $c < $this->size; $c++){
+				if(!$this->modules[$r][$c]) continue;
+				$is_finder = $this->is_finder_module($r, $c);
+				if($is_finder && $custom_finder) continue;
 
-					$svg .= match($this->design){
-						self::DESIGN_ROUNDED => $this->render_rounded_module($r, $c, $ms, $f),
-						self::DESIGN_DOTS    => $this->render_dot_module($r, $c, $ms, $f),
-						default              => $this->render_square_module($r, $c, $ms, $f),
-					};
-				}
+				$f = $is_finder ? $finder_fill : $fill_attr;
+				$svg .= ($this->module_shape === 'dots')
+					? $this->render_dot_module($r, $c, $ms, $f)
+					: $this->render_square_module($r, $c, $ms, $f);
 			}
 		}
+
 		$svg .= '</g>'."\n";
 		$svg .= $this->render_icon($total, $ms);
 		$svg .= '</svg>';
@@ -137,13 +133,6 @@ class SVGRenderer{
 		return sprintf('<rect x="%d" y="%d" width="%d" height="%d" %s/>'."\n", $x, $y, $ms, $ms, $fill);
 	}
 
-	private function render_rounded_module(int $r, int $c, int $ms, string $fill): string{
-		$x = ($c + $this->margin) * $ms;
-		$y = ($r + $this->margin) * $ms;
-		$radius = $ms * $this->corner_radius;
-		return sprintf('<rect x="%d" y="%d" width="%d" height="%d" rx="%.1f" ry="%.1f" %s/>'."\n", $x, $y, $ms, $ms, $radius, $radius, $fill);
-	}
-
 	private function render_dot_module(int $r, int $c, int $ms, string $fill): string{
 		$cx = ($c + $this->margin) * $ms + $ms / 2;
 		$cy = ($r + $this->margin) * $ms + $ms / 2;
@@ -151,7 +140,20 @@ class SVGRenderer{
 		return sprintf('<circle cx="%.1f" cy="%.1f" r="%.1f" %s/>'."\n", $cx, $cy, $radius, $fill);
 	}
 
-	private function render_youtube_finders(string $fill, int $ms): string{
+	private function render_round_finders(string $fill, int $ms): string{
+		$svg = '';
+		foreach([[0, 0], [0, $this->size - 7], [$this->size - 7, 0]] as [$pr, $pc]){
+			$cx = ($pc + $this->margin) * $ms + 3.5 * $ms;
+			$cy = ($pr + $this->margin) * $ms + 3.5 * $ms;
+
+			$svg .= sprintf('<circle cx="%.1f" cy="%.1f" r="%.1f" %s/>'."\n", $cx, $cy, 3.5 * $ms, $fill);
+			$svg .= sprintf('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="%s"/>'."\n", $cx, $cy, 2.5 * $ms, self::escape($this->bg_color));
+			$svg .= sprintf('<circle cx="%.1f" cy="%.1f" r="%.1f" %s/>'."\n", $cx, $cy, 1.5 * $ms, $fill);
+		}
+		return $svg;
+	}
+
+	private function render_modern_finders(string $fill, int $ms): string{
 		$svg = '';
 		foreach([[0, 0], [0, $this->size - 7], [$this->size - 7, 0]] as [$pr, $pc]){
 			$ox = ($pc + $this->margin) * $ms;

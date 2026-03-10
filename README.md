@@ -21,7 +21,8 @@ QRCode::png('https://example.com', '/path/to/output.png');
 
 // ビルダーパターンでカスタマイズ
 $qr = QRCode::create('https://example.com')
-    ->design('youtube')        // standard, rounded, dots, youtube
+    ->module_shape('dots')       // 'square' (デフォルト), 'dots'
+    ->finder_shape('modern')     // 'square' (デフォルト), 'round', 'modern'
     ->fg_color('#FF0000')
     ->bg_color('#FFFFFF')
     ->finder_color('#CC0000')
@@ -37,7 +38,7 @@ $qr->save_png('/path/to/output.png');   // ファイルに保存
 
 // グラデーション (SVGのみ)
 $svg = QRCode::create('https://example.com')
-    ->design('dots')
+    ->module_shape('dots')
     ->gradient('#FF6B6B', '#4ECDC4')
     ->render_svg();
 ```
@@ -51,13 +52,33 @@ $svg = QRCode::create('https://example.com')
 | `QRCode::EC_Q` | 25% |
 | `QRCode::EC_H` | 30% |
 
-アイコンを使用する場合は `EC_H` を推奨。
+アイコン・背景画像使用時は自動的に `EC_H` が適用されます。
 
 ```php
-QRCode::create('https://example.com', QRCode::EC_H)
+QRCode::create('https://example.com')
     ->icon_path('/path/to/logo.png')
     ->save_png('/path/to/output.png');
 ```
+
+### 背景画像 (PNGのみ)
+
+```php
+QRCode::create('https://example.com')
+    ->bg_image('/path/to/photo.jpg', 40)
+    ->save_png('/path/to/output.png');
+```
+
+第2引数は白モジュール部分の透過率 (0-100, デフォルト50)。値が大きいほど背景画像がはっきり見えます。
+
+### 半透明 (モジュールの不透明度)
+
+```php
+QRCode::create('https://example.com')
+    ->alpha(50)
+    ->save_png('/path/to/output.png');
+```
+
+`alpha(0-100)` でモジュール（黒い部分）の不透明度を指定。デフォルト100（完全不透明）。背景画像と組み合わせて使うと、画像上に目立たないQRコードを配置できます。
 
 ## マイクロQRコード
 

@@ -7,10 +7,5 @@
 		"psr-4": {
 			"tt\\barcode\\": "lib/tt/barcode/"
 		}
-	},
-	"archive": {
-		"exclude": [
-			"/test"
-		]
 	}
 }

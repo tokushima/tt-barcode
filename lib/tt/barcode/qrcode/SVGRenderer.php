@@ -5,7 +5,7 @@ namespace tt\barcode\qrcode;
  * QRコードマトリクスをSVGとしてレンダリングする
  *
  * module_shape: 'square' (デフォルト), 'dots'
- * finder_shape: 'square' (デフォルト), 'round', 'modern'
+ * finder_shape: 'square' (デフォルト), 'modern'
  */
 class SVGRenderer{
 	private array $modules;
@@ -93,11 +93,7 @@ class SVGRenderer{
 			: '<g>'."\n";
 
 		if($custom_finder){
-			$svg .= match($this->finder_shape){
-				'round' => $this->render_round_finders($finder_fill, $ms),
-				'modern' => $this->render_modern_finders($finder_fill, $ms),
-				default => '',
-			};
+			$svg .= $this->render_modern_finders($finder_fill, $ms);
 		}
 
 		for($r = 0; $r < $this->size; $r++){
@@ -138,19 +134,6 @@ class SVGRenderer{
 		$cy = ($r + $this->margin) * $ms + $ms / 2;
 		$radius = ($ms / 2) * $this->dot_scale;
 		return sprintf('<circle cx="%.1f" cy="%.1f" r="%.1f" %s/>'."\n", $cx, $cy, $radius, $fill);
-	}
-
-	private function render_round_finders(string $fill, int $ms): string{
-		$svg = '';
-		foreach([[0, 0], [0, $this->size - 7], [$this->size - 7, 0]] as [$pr, $pc]){
-			$cx = ($pc + $this->margin) * $ms + 3.5 * $ms;
-			$cy = ($pr + $this->margin) * $ms + 3.5 * $ms;
-
-			$svg .= sprintf('<circle cx="%.1f" cy="%.1f" r="%.1f" %s/>'."\n", $cx, $cy, 3.5 * $ms, $fill);
-			$svg .= sprintf('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="%s"/>'."\n", $cx, $cy, 2.5 * $ms, self::escape($this->bg_color));
-			$svg .= sprintf('<circle cx="%.1f" cy="%.1f" r="%.1f" %s/>'."\n", $cx, $cy, 1.5 * $ms, $fill);
-		}
-		return $svg;
 	}
 
 	private function render_modern_finders(string $fill, int $ms): string{

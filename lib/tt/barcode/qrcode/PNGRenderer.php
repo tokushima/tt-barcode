@@ -5,7 +5,7 @@ namespace tt\barcode\qrcode;
  * QRコードマトリクスをPNGとしてレンダリングする (GDライブラリ使用)
  *
  * module_shape: 'square' (デフォルト), 'dots'
- * finder_shape: 'square' (デフォルト), 'round', 'modern'
+ * finder_shape: 'square' (デフォルト), 'modern'
  */
 class PNGRenderer{
 	private array $modules;
@@ -99,11 +99,7 @@ class PNGRenderer{
 		$custom_finder = ($this->finder_shape !== 'square');
 
 		if($custom_finder){
-			match($this->finder_shape){
-				'round' => $this->draw_round_finders($img, $ms, $fc, $bg),
-				'modern' => $this->draw_modern_finders($img, $ms, $fc, $bg),
-				default => null,
-			};
+			$this->draw_modern_finders($img, $ms, $fc, $bg);
 		}
 
 		for($r = 0; $r < $this->size; $r++){
@@ -158,20 +154,6 @@ class PNGRenderer{
 			imagefilledrectangle($img, $ox, $oy, $ox + $outer - 1, $oy + $outer - 1, $color);
 			imagefilledrectangle($img, $ox + $ms, $oy + $ms, $ox + 6 * $ms - 1, $oy + 6 * $ms - 1, $bg);
 			imagefilledrectangle($img, $ox + 2 * $ms, $oy + 2 * $ms, $ox + 5 * $ms - 1, $oy + 5 * $ms - 1, $color);
-		}
-	}
-
-	private function draw_round_finders(\GdImage $img, int $ms, int $color, int $bg): void{
-		foreach([[0, 0], [0, $this->size - 7], [$this->size - 7, 0]] as [$pr, $pc]){
-			$cx = (int)(($pc + $this->margin) * $ms + 3.5 * $ms);
-			$cy = (int)(($pr + $this->margin) * $ms + 3.5 * $ms);
-
-			$d_outer = 7 * $ms;
-			imagefilledellipse($img, $cx, $cy, $d_outer, $d_outer, $color);
-			$d_mid = 5 * $ms;
-			imagefilledellipse($img, $cx, $cy, $d_mid, $d_mid, $bg);
-			$d_inner = 3 * $ms;
-			imagefilledellipse($img, $cx, $cy, $d_inner, $d_inner, $color);
 		}
 	}
 

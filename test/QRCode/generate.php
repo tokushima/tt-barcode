@@ -9,9 +9,6 @@ eq(file_get_contents(\testman\Resource::path('QRCode/standard.svg')), QRCode::cr
 // SVG: dots
 eq(file_get_contents(\testman\Resource::path('QRCode/dots.svg')), QRCode::create($text)->module_shape('dots')->fg_color('#e94560')->bg_color('#0f3460')->render_svg());
 
-// SVG: dots + round finder
-eq(file_get_contents(\testman\Resource::path('QRCode/dots_round.svg')), QRCode::create($text)->module_shape('dots')->finder_shape('round')->fg_color('#FF0000')->finder_color('#CC0000')->margin(2)->render_svg());
-
 // SVG: dots + modern finder
 eq(file_get_contents(\testman\Resource::path('QRCode/dots_modern.svg')), QRCode::create($text)->module_shape('dots')->finder_shape('modern')->fg_color('#FF0000')->finder_color('#CC0000')->margin(2)->render_svg());
 
@@ -43,9 +40,6 @@ unlink($tmp);
 
 // 背景画像: standard + bg
 eq(file_get_contents(\testman\Resource::path('QRCode/bg_standard.png')), QRCode::create('https://example.com')->bg_image(\testman\Resource::path('QRCode/bg_test.png'), 40)->module_size(10)->render_png());
-
-// 背景画像: dots + round finder + bg
-eq(file_get_contents(\testman\Resource::path('QRCode/bg_dots_round.png')), QRCode::create('https://example.com')->module_shape('dots')->finder_shape('round')->bg_image(\testman\Resource::path('QRCode/bg_test.png'), 60)->module_size(10)->margin(2)->render_png());
 
 // 背景画像: dots + modern finder + bg
 eq(file_get_contents(\testman\Resource::path('QRCode/bg_dots_modern.png')), QRCode::create('https://example.com')->module_shape('dots')->finder_shape('modern')->fg_color('#FF0000')->finder_color('#CC0000')->bg_image(\testman\Resource::path('QRCode/bg_landscape.png'), 50)->module_size(10)->margin(2)->render_png());

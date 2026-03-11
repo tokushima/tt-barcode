@@ -144,11 +144,11 @@ class SVGRenderer{
 
 			$outer = 7 * $ms;
 			$svg .= sprintf('<rect x="%d" y="%d" width="%d" height="%d" rx="%.1f" ry="%.1f" %s/>'."\n",
-				$ox, $oy, $outer, $outer, $ms * 1.4, $ms * 1.4, $fill);
+				$ox, $oy, $outer, $outer, $ms * 2.0, $ms * 2.0, $fill);
 			$svg .= sprintf('<rect x="%.1f" y="%.1f" width="%d" height="%d" rx="%.1f" ry="%.1f" fill="%s"/>'."\n",
-				$ox + $ms, $oy + $ms, 5 * $ms, 5 * $ms, $ms * 1.0, $ms * 1.0, self::escape($this->bg_color));
+				$ox + $ms, $oy + $ms, 5 * $ms, 5 * $ms, $ms * 1.4, $ms * 1.4, self::escape($this->bg_color));
 			$svg .= sprintf('<rect x="%d" y="%d" width="%d" height="%d" rx="%.1f" ry="%.1f" %s/>'."\n",
-				$ox + 2 * $ms, $oy + 2 * $ms, 3 * $ms, 3 * $ms, $ms * 0.8, $ms * 0.8, $fill);
+				$ox + 2 * $ms, $oy + 2 * $ms, 3 * $ms, 3 * $ms, $ms * 1.0, $ms * 1.0, $fill);
 		}
 		return $svg;
 	}
@@ -163,13 +163,6 @@ class SVGRenderer{
 		$icon_y = ($total_size - $icon_size) / 2;
 
 		$svg = '';
-		$padding = $icon_size * 0.15;
-		$bg_size = $icon_size + $padding * 2;
-		$bg_r = $bg_size * 0.15;
-		$svg .= sprintf(
-			'<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="%.1f" ry="%.1f" fill="%s"/>'."\n",
-			$icon_x - $padding, $icon_y - $padding, $bg_size, $bg_size, $bg_r, $bg_r, self::escape($this->bg_color)
-		);
 
 		if($this->icon_svg !== null){
 			$svg .= sprintf(

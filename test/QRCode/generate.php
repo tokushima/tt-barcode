@@ -43,3 +43,9 @@ eq(file_get_contents(\testman\Resource::path('QRCode/bg_standard.png')), QRCode:
 
 // 背景画像: dots + modern finder + bg
 eq(file_get_contents(\testman\Resource::path('QRCode/bg_dots_modern.png')), QRCode::create('https://example.com')->module_shape('dots')->finder_shape('modern')->fg_color('#FF0000')->finder_color('#CC0000')->bg_image(\testman\Resource::path('QRCode/bg_landscape.png'), 50)->module_size(10)->margin(2)->render_png());
+
+// LINEスタイル: modern finder + square module + icon (PNG)
+eq(file_get_contents(\testman\Resource::path('QRCode/line_style.png')), QRCode::create($text)->finder_shape('modern')->fg_color('#06C755')->finder_color('#06C755')->icon_path(\testman\Resource::path('QRCode/icon_line.png'))->module_size(10)->render_png());
+
+// YouTubeスタイル: dots + modern finder + YouTube icon (PNG)
+eq(file_get_contents(\testman\Resource::path('QRCode/youtube_style.png')), QRCode::create($text)->module_shape('dots')->finder_shape('modern')->icon_path(\testman\Resource::path('QRCode/icon_youtube.png'))->module_size(10)->render_png());

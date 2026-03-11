@@ -56,41 +56,46 @@ class PNGRenderer{
 		$ms = $this->module_size;
 		$total = ($this->size + $this->margin * 2) * $ms;
 
-		$img = imagecreatetruecolor($total, $total);
-		imagealphablending($img, true);
-		imagesavealpha($img, true);
+		// 3x supersampling で滑らかな曲線を実現
+		$ss = 3;
+		$ms3 = $ms * $ss;
+		$total3 = $total * $ss;
 
-		$bg = $this->alloc($img, $this->bg_color);
-		imagefilledrectangle($img, 0, 0, $total - 1, $total - 1, $bg);
+		$hi = imagecreatetruecolor($total3, $total3);
+		imagealphablending($hi, true);
+		imagesavealpha($hi, true);
+
+		$bg = $this->alloc($hi, $this->bg_color);
+		imagefilledrectangle($hi, 0, 0, $total3 - 1, $total3 - 1, $bg);
 
 		if($this->bg_image_path !== null){
-			$this->draw_bg_image($img, $total);
+			$this->draw_bg_image($hi, $total3);
 		}
 
 		if($this->alpha < 100){
 			$gd_alpha = (int)(127 * (1 - $this->alpha / 100));
-			$fg = $this->alloc_alpha($img, $this->fg_color, $gd_alpha);
-			$fc = $this->finder_color ? $this->alloc_alpha($img, $this->finder_color, $gd_alpha) : $fg;
+			$fg = $this->alloc_alpha($hi, $this->fg_color, $gd_alpha);
+			$fc = $this->finder_color ? $this->alloc_alpha($hi, $this->finder_color, $gd_alpha) : $fg;
 		}else{
-			$fg = $this->alloc($img, $this->fg_color);
-			$fc = $this->finder_color ? $this->alloc($img, $this->finder_color) : $fg;
+			$fg = $this->alloc($hi, $this->fg_color);
+			$fc = $this->finder_color ? $this->alloc($hi, $this->finder_color) : $fg;
 		}
 		$is_dots = ($this->module_shape === 'dots');
 
 		if($this->bg_image_path !== null){
-			$white_alpha = $this->alloc_alpha($img, $this->bg_color, (int)(127 * (1 - $this->bg_image_alpha / 100)));
+			$white_alpha = $this->alloc_alpha($hi, $this->bg_color, (int)(127 * (1 - $this->bg_image_alpha / 100)));
 			for($r = 0; $r < $this->size; $r++){
 				for($c = 0; $c < $this->size; $c++){
 					if($this->modules[$r][$c]) continue;
-					$x = ($c + $this->margin) * $ms;
-					$y = ($r + $this->margin) * $ms;
+					$x = ($c + $this->margin) * $ms3;
+					$y = ($r + $this->margin) * $ms3;
 					if($is_dots){
-						$cx = (int)($x + $ms / 2);
-						$cy = (int)($y + $ms / 2);
-						$radius = (int)(($ms / 2) * $this->dot_scale);
-						imagefilledellipse($img, $cx, $cy, $radius * 2, $radius * 2, $white_alpha);
+						$cx = (int)($x + $ms3 / 2);
+						$cy = (int)($y + $ms3 / 2);
+						$radius = (int)(($ms3 / 2) * $this->dot_scale);
+						imagefilledellipse($hi, $cx, $cy, $radius * 2, $radius * 2, $white_alpha);
 					}else{
-						imagefilledrectangle($img, $x, $y, $x + $ms - 1, $y + $ms - 1, $white_alpha);
+						imagefilledrectangle($hi, $x, $y, $x + $ms3 - 1, $y + $ms3 - 1, $white_alpha);
 					}
 				}
 			}
@@ -99,7 +104,7 @@ class PNGRenderer{
 		$custom_finder = ($this->finder_shape !== 'square');
 
 		if($custom_finder){
-			$this->draw_modern_finders($img, $ms, $fc, $bg);
+			$this->draw_modern_finders($hi, $ms3, $fc, $bg);
 		}
 
 		for($r = 0; $r < $this->size; $r++){
@@ -110,19 +115,26 @@ class PNGRenderer{
 				if($is_finder && $custom_finder) continue;
 
 				$color = $is_finder ? $fc : $fg;
-				$x = ($c + $this->margin) * $ms;
-				$y = ($r + $this->margin) * $ms;
+				$x = ($c + $this->margin) * $ms3;
+				$y = ($r + $this->margin) * $ms3;
 
 				if($is_dots){
-					$cx = (int)($x + $ms / 2);
-					$cy = (int)($y + $ms / 2);
-					$radius = (int)(($ms / 2) * $this->dot_scale);
-					imagefilledellipse($img, $cx, $cy, $radius * 2, $radius * 2, $color);
+					$cx = (int)($x + $ms3 / 2);
+					$cy = (int)($y + $ms3 / 2);
+					$radius = (int)(($ms3 / 2) * $this->dot_scale);
+					imagefilledellipse($hi, $cx, $cy, $radius * 2, $radius * 2, $color);
 				}else{
-					imagefilledrectangle($img, $x, $y, $x + $ms - 1, $y + $ms - 1, $color);
+					imagefilledrectangle($hi, $x, $y, $x + $ms3 - 1, $y + $ms3 - 1, $color);
 				}
 			}
 		}
+
+		// 縮小してアンチエイリアス効果
+		$img = imagecreatetruecolor($total, $total);
+		imagealphablending($img, true);
+		imagesavealpha($img, true);
+		imagecopyresampled($img, $hi, 0, 0, 0, 0, $total, $total, $total3, $total3);
+		imagedestroy($hi);
 
 		$this->draw_icon($img, $total, $ms);
 		return $img;
@@ -161,12 +173,20 @@ class PNGRenderer{
 		foreach([[0, 0], [0, $this->size - 7], [$this->size - 7, 0]] as [$pr, $pc]){
 			$ox = ($pc + $this->margin) * $ms;
 			$oy = ($pr + $this->margin) * $ms;
-			$outer = 7 * $ms;
-			// 角丸四角で描画 (GDにはrounded rectがないため矩形+楕円で近似)
-			imagefilledrectangle($img, $ox, $oy, $ox + $outer - 1, $oy + $outer - 1, $color);
-			imagefilledrectangle($img, $ox + $ms, $oy + $ms, $ox + 6 * $ms - 1, $oy + 6 * $ms - 1, $bg);
-			imagefilledrectangle($img, $ox + 2 * $ms, $oy + 2 * $ms, $ox + 5 * $ms - 1, $oy + 5 * $ms - 1, $color);
+			$this->draw_rounded_rect($img, $ox, $oy, 7 * $ms, 7 * $ms, (int)($ms * 2.0), $color);
+			$this->draw_rounded_rect($img, $ox + $ms, $oy + $ms, 5 * $ms, 5 * $ms, (int)($ms * 1.4), $bg);
+			$this->draw_rounded_rect($img, $ox + 2 * $ms, $oy + 2 * $ms, 3 * $ms, 3 * $ms, (int)($ms * 1.0), $color);
 		}
+	}
+
+	private function draw_rounded_rect(\GdImage $img, int $x, int $y, int $w, int $h, int $r, int $color): void{
+		$r = min($r, (int)($w / 2), (int)($h / 2));
+		imagefilledrectangle($img, $x + $r, $y, $x + $w - $r - 1, $y + $h - 1, $color);
+		imagefilledrectangle($img, $x, $y + $r, $x + $w - 1, $y + $h - $r - 1, $color);
+		imagefilledellipse($img, $x + $r,         $y + $r,         $r * 2, $r * 2, $color);
+		imagefilledellipse($img, $x + $w - $r - 1, $y + $r,         $r * 2, $r * 2, $color);
+		imagefilledellipse($img, $x + $r,         $y + $h - $r - 1, $r * 2, $r * 2, $color);
+		imagefilledellipse($img, $x + $w - $r - 1, $y + $h - $r - 1, $r * 2, $r * 2, $color);
 	}
 
 	private function draw_icon(\GdImage $img, int $total, int $ms): void{
@@ -176,12 +196,6 @@ class PNGRenderer{
 		$icon_x = (int)(($total - $icon_size) / 2);
 		$icon_y = (int)(($total - $icon_size) / 2);
 
-		$bg = $this->alloc($img, $this->bg_color);
-		$padding = (int)($icon_size * 0.15);
-		imagefilledrectangle($img,
-			$icon_x - $padding, $icon_y - $padding,
-			$icon_x + $icon_size + $padding - 1, $icon_y + $icon_size + $padding - 1, $bg
-		);
 
 		$ext = strtolower(pathinfo($this->icon_path, PATHINFO_EXTENSION));
 		$icon_img = match($ext){

@@ -22,8 +22,8 @@ use tt\barcode\rmqr\PNGRenderer;
  *     ->save_svg('/path/to/output.svg');
  */
 class rMQR{
-	const int EC_M = 0;
-	const int EC_H = 1;
+	const EC_M = 0;
+	const EC_H = 1;
 
 	private array $modules;
 	private string $fg_color = '#000000';

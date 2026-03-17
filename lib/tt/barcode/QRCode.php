@@ -39,10 +39,10 @@ use tt\barcode\qrcode\PNGRenderer;
  *   アイコン・背景画像使用時は自動的にEC_Hが適用される
  */
 class QRCode{
-	const int EC_L = QRData::EC_L;
-	const int EC_M = QRData::EC_M;
-	const int EC_Q = QRData::EC_Q;
-	const int EC_H = QRData::EC_H;
+	const EC_L = QRData::EC_L;
+	const EC_M = QRData::EC_M;
+	const EC_Q = QRData::EC_Q;
+	const EC_H = QRData::EC_H;
 
 	private string $text;
 	private int $ec_level;

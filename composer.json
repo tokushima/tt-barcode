@@ -1,7 +1,7 @@
 {
 	"name": "tokushima/tt-barcode",
 	"require": {
-		"php": ">=8.3"
+		"php": ">=8.2"
 	},
 	"autoload": {
 		"psr-4": {

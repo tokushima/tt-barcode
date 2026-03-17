@@ -12,7 +12,7 @@ class rMQRData{
 	 *  data_bits_M, data_bits_H,
 	 *  blocks_M => [[num, c, k], ...], blocks_H => [[num, c, k], ...]]
 	 */
-	const array VERSIONS = [
+	const VERSIONS = [
 		// R7xN
 		['R7x43',   0,  7,  43,  13, 0, 4, 3, 3, 2,  48,  24, [[1, 13,  6]], [[1, 13,  3]]],
 		['R7x59',   1,  7,  59,  21, 3, 5, 5, 4, 3,  96,  56, [[1, 21, 12]], [[1, 21,  7]]],
@@ -57,7 +57,7 @@ class rMQRData{
 	 * アライメントパターン座標 (列幅別)
 	 * キー=シンボル幅, 値=アライメントパターン中心x座標配列
 	 */
-	const array ALIGNMENT_COORDS = [
+	const ALIGNMENT_COORDS = [
 		27  => [],
 		43  => [21],
 		59  => [19, 39],
@@ -69,30 +69,30 @@ class rMQRData{
 	/**
 	 * モードインジケータ
 	 */
-	const int MODE_NUMERIC = 0b001;
-	const int MODE_ALNUM = 0b010;
-	const int MODE_BYTE = 0b011;
-	const int MODE_KANJI = 0b100;
-	const int MODE_TERMINATOR = 0b000;
+	const MODE_NUMERIC = 0b001;
+	const MODE_ALNUM = 0b010;
+	const MODE_BYTE = 0b011;
+	const MODE_KANJI = 0b100;
+	const MODE_TERMINATOR = 0b000;
 
 	/**
 	 * フォーマット情報BCH(18,6)生成多項式
 	 * x^12 + x^11 + x^10 + x^9 + x^8 + x^5 + x^2 + 1
 	 */
-	const int FORMAT_BCH_POLY = 0b1111100100101;
+	const FORMAT_BCH_POLY = 0b1111100100101;
 
 	/**
 	 * フォーマット情報マスク (finder pattern側)
 	 */
-	const int FORMAT_MASK_FINDER = 0b011111101010110010;
+	const FORMAT_MASK_FINDER = 0b011111101010110010;
 
 	/**
 	 * フォーマット情報マスク (finder sub pattern側)
 	 */
-	const int FORMAT_MASK_SUB = 0b100000101001111011;
+	const FORMAT_MASK_SUB = 0b100000101001111011;
 
 	/**
 	 * 英数字テーブル
 	 */
-	const string ALNUM_TABLE = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:';
+	const ALNUM_TABLE = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:';
 }

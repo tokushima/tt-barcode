@@ -7,17 +7,17 @@ namespace tt\barcode\microqr;
  * バージョン M1-M4, サイズ 11x11 - 17x17
  */
 class MicroQRData{
-	const int EC_DETECT = 0; // M1のみ: 誤り検出のみ
-	const int EC_L = 1;
-	const int EC_M = 2;
-	const int EC_Q = 3;
+	const EC_DETECT = 0; // M1のみ: 誤り検出のみ
+	const EC_L = 1;
+	const EC_M = 2;
+	const EC_Q = 3;
 
-	const int MODE_NUMERIC = 0;
-	const int MODE_ALPHANUMERIC = 1;
-	const int MODE_BYTE = 2;
-	const int MODE_KANJI = 3;
+	const MODE_NUMERIC = 0;
+	const MODE_ALPHANUMERIC = 1;
+	const MODE_BYTE = 2;
+	const MODE_KANJI = 3;
 
-	const string ALPHANUMERIC_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:';
+	const ALPHANUMERIC_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:';
 
 	/**
 	 * バージョンごとのモジュール数
@@ -38,7 +38,7 @@ class MicroQRData{
 	 * 文字数指示子のビット長
 	 * [version][mode] => bits
 	 */
-	const array CHAR_COUNT_BITS = [
+	const CHAR_COUNT_BITS = [
 		1 => [3, 0, 0, 0],  // M1: 数字のみ
 		2 => [4, 3, 0, 0],  // M2: 数字,英数字
 		3 => [5, 4, 4, 3],  // M3: 数字,英数字,バイト,漢字
@@ -49,7 +49,7 @@ class MicroQRData{
 	 * バージョン/誤り訂正レベルごとのデータ容量
 	 * [version][ec_level] => [total_codewords, ec_codewords, data_codewords]
 	 */
-	const array VERSION_TABLE = [
+	const VERSION_TABLE = [
 		1 => [
 			[5, 2, 3],    // EC_DETECT (誤り検出のみ)
 		],
@@ -71,7 +71,7 @@ class MicroQRData{
 	/**
 	 * バージョンとECレベルの組み合わせでサポートされるモード
 	 */
-	const array SUPPORTED_MODES = [
+	const SUPPORTED_MODES = [
 		1 => [self::EC_DETECT => [self::MODE_NUMERIC]],
 		2 => [
 			self::EC_L => [self::MODE_NUMERIC, self::MODE_ALPHANUMERIC],
@@ -92,7 +92,7 @@ class MicroQRData{
 	 * データ容量（文字数上限）
 	 * [version][ec_level][mode] => max_chars
 	 */
-	const array CAPACITY = [
+	const CAPACITY = [
 		1 => [self::EC_DETECT => [5, 0, 0, 0]],
 		2 => [
 			self::EC_L => [10, 6, 0, 0],
@@ -115,7 +115,7 @@ class MicroQRData{
 	 * symbol_number: version/ECの組み合わせ (0-7)
 	 *   0: M1-Detect, 1: M2-L, 2: M2-M, 3: M3-L, 4: M3-M, 5: M4-L, 6: M4-M, 7: M4-Q
 	 */
-	const array SYMBOL_NUMBERS = [
+	const SYMBOL_NUMBERS = [
 		'1_0' => 0, // M1, EC_DETECT
 		'2_1' => 1, // M2, EC_L
 		'2_2' => 2, // M2, EC_M
@@ -130,7 +130,7 @@ class MicroQRData{
 	 * フォーマット情報ビット列 (15bit)
 	 * [symbol_number][mask_pattern] => 15bit value
 	 */
-	const array FORMAT_INFO = [
+	const FORMAT_INFO = [
 		// symbol_number 0 (M1-Detect), mask 0-3
 		[0x4445, 0x4172, 0x4E2B, 0x4B1C],
 		// symbol_number 1 (M2-L)

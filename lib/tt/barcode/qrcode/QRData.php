@@ -5,24 +5,24 @@ namespace tt\barcode\qrcode;
  * QRコード仕様データテーブル (ISO/IEC 18004)
  */
 class QRData{
-	const int EC_L = 0;
-	const int EC_M = 1;
-	const int EC_Q = 2;
-	const int EC_H = 3;
+	const EC_L = 0;
+	const EC_M = 1;
+	const EC_Q = 2;
+	const EC_H = 3;
 
-	const int MODE_NUMERIC = 1;
-	const int MODE_ALPHANUMERIC = 2;
-	const int MODE_BYTE = 4;
+	const MODE_NUMERIC = 1;
+	const MODE_ALPHANUMERIC = 2;
+	const MODE_BYTE = 4;
 
-	const string ALPHANUMERIC_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:';
+	const ALPHANUMERIC_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:';
 
-	const array CHAR_COUNT_BITS = [
+	const CHAR_COUNT_BITS = [
 		self::MODE_NUMERIC      => [10, 12, 14],
 		self::MODE_ALPHANUMERIC => [9, 11, 13],
 		self::MODE_BYTE         => [8, 16, 16],
 	];
 
-	const array VERSION_TABLE = [
+	const VERSION_TABLE = [
 		1  => [[  26,  7, 1, 19, 0,  0], [  26, 10, 1, 16, 0,  0], [  26, 13, 1, 13, 0,  0], [  26, 17, 1,  9, 0,  0]],
 		2  => [[  44, 10, 1, 34, 0,  0], [  44, 16, 1, 28, 0,  0], [  44, 22, 1, 22, 0,  0], [  44, 28, 1, 16, 0,  0]],
 		3  => [[  70, 15, 1, 55, 0,  0], [  70, 26, 1, 44, 0,  0], [  70, 18, 2, 17, 0,  0], [  70, 22, 2, 13, 0,  0]],
@@ -65,7 +65,7 @@ class QRData{
 		40 => [[3706, 30,19,118, 6,119], [3706, 28,18, 47,31, 48], [3706, 30,34, 24,34, 25], [3706, 30,20, 15,61, 16]],
 	];
 
-	const array ALIGNMENT_POSITIONS = [
+	const ALIGNMENT_POSITIONS = [
 		1  => [],
 		2  => [6, 18],       3  => [6, 22],       4  => [6, 26],       5  => [6, 30],       6  => [6, 34],
 		7  => [6, 22, 38],   8  => [6, 24, 42],   9  => [6, 26, 46],  10 => [6, 28, 50],
@@ -83,7 +83,7 @@ class QRData{
 		39 => [6, 26, 54, 82, 110, 138, 166],  40 => [6, 30, 58, 86, 114, 142, 170],
 	];
 
-	const array FORMAT_INFO = [
+	const FORMAT_INFO = [
 		// L (EC indicator 01), mask 0-7
 		0x77C4, 0x72F3, 0x7DAA, 0x789D, 0x662F, 0x6318, 0x6C41, 0x6976,
 		// M (EC indicator 00), mask 0-7
@@ -94,7 +94,7 @@ class QRData{
 		0x1689, 0x13BE, 0x1CE7, 0x19D0, 0x0762, 0x0255, 0x0D0C, 0x083B,
 	];
 
-	const array VERSION_INFO = [
+	const VERSION_INFO = [
 		7  => 0x07C94, 8  => 0x085BC, 9  => 0x09A99, 10 => 0x0A4D3,
 		11 => 0x0BBF6, 12 => 0x0C762, 13 => 0x0D847, 14 => 0x0E60D,
 		15 => 0x0F928, 16 => 0x10B78, 17 => 0x1145D, 18 => 0x12A17,

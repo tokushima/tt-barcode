@@ -27,10 +27,10 @@ use tt\barcode\microqr\PNGRenderer;
  *   MicroQR::EC_DETECT (M1のみ), MicroQR::EC_L, MicroQR::EC_M, MicroQR::EC_Q (M4のみ)
  */
 class MicroQR{
-	const int EC_DETECT = MicroQRData::EC_DETECT;
-	const int EC_L = MicroQRData::EC_L;
-	const int EC_M = MicroQRData::EC_M;
-	const int EC_Q = MicroQRData::EC_Q;
+	const EC_DETECT = MicroQRData::EC_DETECT;
+	const EC_L = MicroQRData::EC_L;
+	const EC_M = MicroQRData::EC_M;
+	const EC_Q = MicroQRData::EC_Q;
 
 	private array $modules;
 	private string $fg_color = '#000000';

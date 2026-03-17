@@ -7,10 +7,10 @@ namespace tt\barcode;
  */
 class CustomerBarcode{
 	// バーの種類
-	const int BAR_LONG = 1;      // ロングバー（フルハイト）
-	const int BAR_SEMI_UP = 2;   // セミロングバー（上）アセンダ
-	const int BAR_SEMI_DOWN = 3; // セミロングバー（下）ディセンダ
-	const int BAR_TIMING = 4;    // タイミングバー（短）トラッカー
+	const BAR_LONG = 1;      // ロングバー（フルハイト）
+	const BAR_SEMI_UP = 2;   // セミロングバー（上）アセンダ
+	const BAR_SEMI_DOWN = 3; // セミロングバー（下）ディセンダ
+	const BAR_TIMING = 4;    // タイミングバー（短）トラッカー
 
 	// キャラクタ → バーパターン（各3バー）
 	private static array $CHAR_PATTERNS = [

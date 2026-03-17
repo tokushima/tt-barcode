@@ -9,7 +9,7 @@ class DataMatrixData{
 	 * シンボルサイズテーブル
 	 * [rows, cols, data_regions_row, data_regions_col, data_codewords, ec_codewords, interleaved_blocks]
 	 */
-	const array SYMBOL_SIZES = [
+	const SYMBOL_SIZES = [
 		// 正方形
 		[10, 10, 1, 1,   3,   5, 1],
 		[12, 12, 1, 1,   5,   7, 1],
@@ -47,11 +47,11 @@ class DataMatrixData{
 	/**
 	 * GF(256) primitive polynomial: x^8 + x^5 + x^3 + x^2 + 1 = 0x12D
 	 */
-	const int GF_POLY = 0x12D;
+	const GF_POLY = 0x12D;
 
 	/**
 	 * ASCIIエンコーディング定数
 	 */
-	const int PAD = 129;
-	const int UPPER_SHIFT = 235;
+	const PAD = 129;
+	const UPPER_SHIFT = 235;
 }

@@ -37,3 +37,19 @@ unlink($tmp);
 // マトリクスサイズ確認
 eq(12, count(DataMatrix::create('Hello')->matrix()));
 eq(52, count(DataMatrix::create(str_repeat('A', 180))->matrix()));
+
+// 形状指定: 正方形
+$sq = DataMatrix::create('Hello')->shape('square');
+$sq_matrix = $sq->matrix();
+eq(count($sq_matrix), count($sq_matrix[0])); // rows == cols
+
+// 形状指定: 長方形
+$rect = DataMatrix::create('Hello')->shape('rectangle');
+$rect_matrix = $rect->matrix();
+neq(count($rect_matrix), count($rect_matrix[0])); // rows != cols
+eq(8, count($rect_matrix)); // 8x18
+eq(18, count($rect_matrix[0]));
+
+// 形状指定: 長方形 SVG/PNG
+eq(file_get_contents(\testman\Resource::path('DataMatrix/rectangle.svg')), $rect->render_svg());
+eq(file_get_contents(\testman\Resource::path('DataMatrix/rectangle.png')), $rect->render_png());

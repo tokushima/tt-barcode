@@ -13,9 +13,13 @@ class DataMatrixEncoder{
 	/**
 	 * @return bool[][] Data Matrixマトリクス (true=黒モジュール)
 	 */
-	public static function encode(string $text): array{
+	/**
+	 * @param string $shape 'auto'|'square'|'rectangle'
+	 * @return bool[][] Data Matrixマトリクス (true=黒モジュール)
+	 */
+	public static function encode(string $text, string $shape = 'auto'): array{
 		$codewords = self::encode_ascii($text);
-		$symbol = self::select_symbol(count($codewords));
+		$symbol = self::select_symbol(count($codewords), $shape);
 
 		$codewords = self::pad_codewords($codewords, $symbol[4]);
 		$blocks = $symbol[6];
@@ -89,11 +93,12 @@ class DataMatrixEncoder{
 		return $codewords;
 	}
 
-	private static function select_symbol(int $data_len): array{
+	private static function select_symbol(int $data_len, string $shape = 'auto'): array{
 		foreach(DataMatrixData::SYMBOL_SIZES as $sym){
-			if($sym[4] >= $data_len){
-				return $sym;
-			}
+			if($sym[4] < $data_len) continue;
+			if($shape === 'square' && $sym[0] !== $sym[1]) continue;
+			if($shape === 'rectangle' && $sym[0] === $sym[1]) continue;
+			return $sym;
 		}
 		throw new \InvalidArgumentException('Data too large for Data Matrix');
 	}

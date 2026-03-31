@@ -20,20 +20,26 @@ use tt\barcode\datamatrix\PNGRenderer;
  *     ->module_size(10)
  *     ->margin(2)
  *     ->save_svg('/path/to/output.svg');
+ *
+ * // 形状指定
+ * DataMatrix::create('Hello')->shape('rectangle')->render_svg();
+ * DataMatrix::create('Hello')->shape('square')->render_svg();
  */
 class DataMatrix{
-	private array $modules;
+	private string $text;
+	private string $shape = 'auto';
+	private ?array $modules = null;
 	private string $fg_color = '#000000';
 	private string $bg_color = '#FFFFFF';
 	private int $module_size = 10;
 	private int $margin = 2;
 
-	private function __construct(array $modules){
-		$this->modules = $modules;
+	private function __construct(string $text){
+		$this->text = $text;
 	}
 
 	public static function create(string $text): self{
-		return new self(DataMatrixEncoder::encode($text));
+		return new self($text);
 	}
 
 	public static function svg(string $text): string{
@@ -44,13 +50,23 @@ class DataMatrix{
 		self::create($text)->save_png($filepath);
 	}
 
+	/**
+	 * 形状指定: 'auto' (デフォルト), 'square', 'rectangle'
+	 */
+	public function shape(string $shape): self{
+		$this->shape = $shape;
+		$this->modules = null;
+		return $this;
+	}
+
 	public function fg_color(string $color): self{ $this->fg_color = $color; return $this; }
 	public function bg_color(string $color): self{ $this->bg_color = $color; return $this; }
 	public function module_size(int $px): self{ $this->module_size = $px; return $this; }
 	public function margin(int $modules): self{ $this->margin = $modules; return $this; }
 
 	public function size(int $px): self{
-		$max_dim = max(count($this->modules), count($this->modules[0]));
+		$m = $this->modules();
+		$max_dim = max(count($m), count($m[0]));
 		$this->module_size = max(1, (int)floor($px / ($max_dim + $this->margin * 2)));
 		return $this;
 	}
@@ -74,18 +90,25 @@ class DataMatrix{
 	}
 
 	public function matrix(): array{
+		return $this->modules();
+	}
+
+	private function modules(): array{
+		if($this->modules === null){
+			$this->modules = DataMatrixEncoder::encode($this->text, $this->shape);
+		}
 		return $this->modules;
 	}
 
 	private function build_svg(): SVGRenderer{
-		$r = new SVGRenderer($this->modules);
+		$r = new SVGRenderer($this->modules());
 		$r->fg_color($this->fg_color)->bg_color($this->bg_color)
 			->module_size($this->module_size)->margin($this->margin);
 		return $r;
 	}
 
 	private function build_png(): PNGRenderer{
-		$r = new PNGRenderer($this->modules);
+		$r = new PNGRenderer($this->modules());
 		$r->fg_color($this->fg_color)->bg_color($this->bg_color)
 			->module_size($this->module_size)->margin($this->margin);
 		return $r;
